@@ -77,21 +77,11 @@ int InfraStop() {
 }
 
 int Arret5cm() {
-  // Lire l'état des bumpers
-  bool leftPressed = digitalRead(bumperLeft) == LOW; // Bumper gauche pressé
-  bool rightPressed = digitalRead(bumperRight) == LOW; // Bumper droit pressé
-
-  // Si l'un des bumpers est pressé, arrêter les moteurs
- if (leftPressed || rightPressed) {
-    MoteurG(400);
-    MoteurD(400);
-    lcd.setCursor(0, 0);
-    lcd.print("arret cause");
-    lcd.setCursor(1, 0);
-    lcd.print("bumpers");
-  }
-  else {
-     MoteurG(600);
-    MoteurD(600);
+   if (RangeF <= 5) {
+    StopMoteurGD;
+  } else if (RangeD <= 5) {  // Si obstacle plus proche à gauche
+    StopMoteurGD;
+  } else if (RangeG <= 5) {  // Si obstacle plus proche à droite
+    StopMoteurGD;
   }
 }
