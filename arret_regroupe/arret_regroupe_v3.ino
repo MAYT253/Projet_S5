@@ -60,7 +60,7 @@ int RotStop() {
   lcd.setCursor(0, 0);
 
   // Vérification de la vitesse de rotation
-  if (abs(gx) > 200 || abs(gy) > 200 || abs(gz) > 200) {
+  if (abs(gz) > 200) {
     lcd.print("Vrot trop grande");
     MoteurGD(Stop, Stop);
   }
