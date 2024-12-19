@@ -53,10 +53,6 @@ int RotStop() {
   lcd.print(gy);
   lcd.print(gz);
 
-  long RangeG = ultrasonicG.MeasureInCentimeters();  //mesure de la distance sur le capteur à ultrasons gauche
-  long RangeD = ultrasonicD.MeasureInCentimeters();  //mesure de la distance sur le capteur à ultrasons droit
-  long RangeF = ultrasonicF.MeasureInCentimeters();  //mesure de la distance sur le capteur ultrasons avant
-
   lcd.setCursor(0, 0);
 
   // Vérification de la vitesse de rotation
