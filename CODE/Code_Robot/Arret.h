@@ -8,8 +8,8 @@
 //#include "moteur.h"
 
 //Valeur de courant
-#define MIN_CURRENT -4.955
-#define MAX_CURRENT 5.621
+#define MIN_CURRENT -1.239
+#define MAX_CURRENT 1.263
 #define MAX_CURRENT_MOTOR 1.6
 //Bumper
 #define bumperLeft 2
