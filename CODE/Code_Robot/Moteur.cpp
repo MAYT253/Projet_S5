@@ -54,7 +54,7 @@ void moteur::Stop() {
 }
 
 void moteur::POLICE() {
-  if (moteur::prevmillis + 100 < millis()) {
+  if (moteur::prevmillis + 1000 < millis()) {
     moteur::couleur = !moteur::couleur;
     moteur::prevmillis = millis();
   }
