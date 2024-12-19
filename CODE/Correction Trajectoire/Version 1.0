@@ -1,0 +1,181 @@
+#include "Ultrasonic.h"
+#include "rgb_lcd.h"
+#include <Servo.h>
+#define Thash 800
+#define Stop 400
+#define Vmax Thash
+#define LedToggle digitalWrite(13, !digitalRead(13))
+#define MoteurG(Vg) OCR5A = Vg // Vg in [0...1999]
+#define MoteurD(Vd) OCR5B = Vd // Vd in [0...1999]
+#define MoteurGD(Vg, Vd) MoteurG(Vg); MoteurD(Vd)
+#define StopMoteurGD MoteurGD(Stop, Stop)
+#define Jstk_seuil_max 600;
+#define Jstk_seuil_min 400;
+
+Servo myservo;  // Servo object to control a servo
+volatile int pos = 0;
+volatile int consigne = 60;   
+static unsigned long prevMillis = 0;  // Tracks the last time the delay was updated
+static int i= 1;    
+unsigned long currentMillis;
+           
+const unsigned long delayInterval = 100;  // 0.5 seconds in milliseconds
+float e = 0.0, e2 = 0.0, inte = 0.0;
+volatile int commande = 0, commande2 = 0;
+//volatile int tempo = 0, interval = 1000, prev_tempo = 0;
+volatile int vistess_const2 = 660, vistess_const1 = 600;
+volatile int RangeF, RangeG, RangeD;
+volatile int cof_d;
+volatile int F_table[10];
+volatile int G_table[10];
+volatile int R_table[10];
+
+volatile int a=0;
+
+//variable menu PID
+int X;
+int Y;  
+int Coff_Corr_Roue_D=0;
+int Coff_Corr_Roue_G=0;
+int enter=0;
+
+//variable delay
+unsigned long previousMillis = 0; // Stores the last time the action was performed
+const unsigned long interval = 400; // 400 milliseconds
+
+
+void initMoteurs() {
+    DDRL = 0x18; // PL3 and PL4
+    DDRB = 0x80; // PB7 LedToggle
+    TCCR5A = (1 << COM5A1) + (1 << COM5B1);
+    TCCR5B = (1 << ICNC5) + (1 << WGM53) + (1 << CS50); // Prediv by 1
+    ICR5 = Thash; // 1999 corresponds to f = 4kHz
+    StopMoteurGD;
+//    TIMSK5 = 1 << TOIE5; // Timer overflow interrupt
+}
+
+// ISR(TIMER5_OVF_vect) {
+//     LedToggle;
+// }
+
+rgb_lcd lcd;
+Ultrasonic ultrasonicG(10);
+Ultrasonic ultrasonicD(8);
+Ultrasonic ultrasonicF(12);
+
+void setup() {
+    Serial.begin(9600);
+
+    lcd.begin(16,2);
+    lcd.setRGB(200,200,200);
+
+
+    pinMode(43, OUTPUT);
+    digitalWrite(43, 0);
+    initMoteurs();
+//    sei();
+    digitalWrite(43, 1);
+    pinMode(A2,INPUT_PULLUP);
+}
+
+void loop() {
+
+    // Update sensor readings
+    RangeG = ultrasonicG.MeasureInCentimeters();
+    //RangeD = ultrasonicD.MeasureInCentimeters();
+    RangeF = ultrasonicF.MeasureInCentimeters();
+
+    //menu parametrage
+     if (analogRead(A2) >1000)
+    {
+      unsigned long currentMillis = millis();
+    
+      if (currentMillis - previousMillis >= interval) 
+      {
+        previousMillis = currentMillis;
+        enter++;
+        if (enter==3) enter=0;
+      }
+    }
+   
+   
+    // Call the zone function
+    if (enter==0)
+    {
+      zone_1();
+    }
+    
+    if (enter==1)
+    {
+      menu_err_D();
+    }
+    if (enter==2)
+    {
+      menu_err_G();
+    }
+
+    // Check conditions
+    if (RangeF <= 90) {
+        MoteurD(520);
+        MoteurG(400);
+        delay(500);
+    }
+}
+void zone_1() {
+    RangeD = ultrasonicD.MeasureInCentimeters();
+    lcd.setCursor(0, 0);
+    lcd.print("  GO! GO! GO!  ");
+    lcd.setCursor(3,2);
+    lcd.print ("Menu PID->     ");
+    
+ 
+    MoteurGD(vistess_const2, vistess_const1);
+
+    if (RangeD <= 60) 
+    {
+      e2 = abs(60 - RangeD)*Coff_Corr_Roue_G/10;
+      e = constrain(e2, 0, 50);
+      commande = e;
+      MoteurD(vistess_const1);
+      MoteurG(vistess_const2 - commande); 
+    } else if (RangeD >= 61) { 
+        float e3 = abs(60 - RangeD) * (Coff_Corr_Roue_D/10);
+        float e1 = constrain(e3, 0, 100);
+        commande2 = e1;
+        MoteurG(vistess_const2);
+        MoteurD(vistess_const1 - commande2);
+    }
+}
+
+void menu_err_D()
+{
+  X = (analogRead(A2) > 600 && analogRead(A2) < 800) ? 1 : ((analogRead(A2) < 400) ? -1 : 0);
+
+  Coff_Corr_Roue_D=Coff_Corr_Roue_D+X;
+  Coff_Corr_Roue_D=constrain(Coff_Corr_Roue_D, 0, 20);
+  delay(400);
+  Serial.println(Coff_Corr_Roue_D/10);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print ("Coff Roue D:");
+  lcd.setCursor(13,0);
+  lcd.print (Coff_Corr_Roue_D);
+}
+
+void menu_err_G()
+{
+  X = (analogRead(A2) > 600 && analogRead(A2) < 800) ? 1 : ((analogRead(A2) < 400) ? -1 : 0);
+
+  Coff_Corr_Roue_G=Coff_Corr_Roue_G+X;
+  Coff_Corr_Roue_G=constrain(Coff_Corr_Roue_G, 0, 10);
+  delay(400);
+  Serial.println(Coff_Corr_Roue_G/10);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print ("Coff Roue G:");
+  lcd.setCursor(13,0);
+  lcd.print (Coff_Corr_Roue_G);
+}
+
+
+
