@@ -1,6 +1,6 @@
 #include "Arret.h"
 
-int Arret(bool OMG, bool OMD,long codeur_L,long codeur_R) {
+int Arret(bool OMG, bool OMD,long newLeft,long newRight) {
 
   //Arret Electrique
   int CurrentR = 0;
@@ -17,11 +17,12 @@ int Arret(bool OMG, bool OMD,long codeur_L,long codeur_R) {
   if (abs(IMU.readFloatGyroZ()) > 200) code_Arret = 3;
 
   //Arret Roue(s) Bloquée(s)
-  newLeft = knobLeft.read();
-  newRight = knobRight.read();
-  if (((newLeft == positionLeft) && OMG) || ((newRight == positionRight) && OMG)) code_Arret = 4;
-  positionLeft = newLeft;
-  positionRight = newRight;
+  if (prevmillis + 500 <= millis()) {
+    if (((newLeft == positionLeft) && OMG) || ((newRight == positionRight) && OMG)) code_Arret = 4;
+    positionLeft = newLeft;
+    positionRight = newRight;
+    prevmillis = millis();
+  }
 
   //Arret Distance<5cm
   if (UltraF.MeasureInCentimeters() <= 5 || UltraD.MeasureInCentimeters() <= 5 || UltraG.MeasureInCentimeters() <= 5) code_Arret = 5;
