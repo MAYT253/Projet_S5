@@ -4,12 +4,12 @@ int Arret(bool OMG, bool OMD, long newLeft, long newRight) {
 
   //Arret Electrique
   int CurrentR = 0;
-  for (int i = 0; i < 9; i++) CurrentR += analogRead(A4);
+  for (int i = 0; i < 10; i++) CurrentR += analogRead(A4);
   CurrentR = CurrentR / 10;
   if (map(CurrentR, 0, 1023, MIN_CURRENT, MAX_CURRENT) >= MAX_CURRENT_MOTOR) code_Arret = 2;
 
   int CurrentL = 0;
-  for (int i = 0; i < 9; i++) CurrentL += analogRead(A5);
+  for (int i = 0; i < 10; i++) CurrentL += analogRead(A5);
   CurrentL = CurrentL / 10;
   if (map(CurrentL, 0, 1023, MIN_CURRENT, MAX_CURRENT) >= MAX_CURRENT_MOTOR) code_Arret = 2;
 
