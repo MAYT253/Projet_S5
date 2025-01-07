@@ -22,13 +22,12 @@ static LSM6DS3 IMU(I2C_MODE, 0x6A);
 static Ultrasonic UltraD(8);
 static Ultrasonic UltraG(10);
 static Ultrasonic UltraF(12);
-//Encoder
-static Encoder knobLeft(18, 29);
-static Encoder knobRight(19, 27);
 //Pas d'arret
 static int code_Arret = 0;
+//Arret Roue Bloquée
+static long prevmillis;
 static long positionLeft, positionRight = -100;
-static long newLeft, newRight = 0;
+//static long newLeft, newRight = 0;
 
 int Arret(bool, bool, long, long);
 
