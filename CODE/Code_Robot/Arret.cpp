@@ -1,6 +1,6 @@
 #include "Arret.h"
 
-int Arret(bool OMG, bool OMD,long newLeft,long newRight) {
+int Arret(bool OMG, bool OMD, long newLeft, long newRight) {
 
   //Arret Electrique
   int CurrentR = 0;
@@ -16,6 +16,7 @@ int Arret(bool OMG, bool OMD,long newLeft,long newRight) {
   //Arret Mécanique
   if (abs(IMU.readFloatGyroZ()) > 200) code_Arret = 3;
 
+
   //Arret Roue(s) Bloquée(s)
   if (prevmillis + 500 <= millis()) {
     if (((newLeft == positionLeft) && OMG) || ((newRight == positionRight) && OMG)) code_Arret = 4;
@@ -29,7 +30,7 @@ int Arret(bool OMG, bool OMD,long newLeft,long newRight) {
 
   //Temps écoulé
   long currentTime = millis();
-  if ((millis() > 300*1000)) code_Arret = 6;
+  if ((millis() > 300 * 1000)) code_Arret = 6;
 
   //Bumper taper
   bool leftPressed = digitalRead(bumperLeft) == LOW;    // Bumper gauche à l'état bas
